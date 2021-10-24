@@ -1,0 +1,6 @@
+---
+http_port: 8080
+pod_state: "started"
+volume_state: "present"
+mysql_user: "wordpress"
+mysql_pass: "wordpress"

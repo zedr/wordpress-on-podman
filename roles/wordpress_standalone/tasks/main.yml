@@ -1,0 +1,16 @@
+---
+- name: "Dependencies must be installed"
+  import_tasks:
+    file: "deps.yml"
+
+- name: "The common Pod should be created"
+  import_tasks:
+    file: "pod.yml"
+
+- name: "Database containers must be running."
+  import_tasks:
+    file: "db.yml"
+
+- name: "Wordpress containers must be running."
+  import_tasks:
+    file: "wordpress.yml"

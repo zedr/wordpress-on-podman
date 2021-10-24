@@ -1,0 +1,24 @@
+---
+- name: "Create the MariaDB WWW volume"
+  containers.podman.podman_volume:
+    name: "mariadb-{{ http_port }}"
+    state: "{{ volume_state }}"
+
+- name: "Set the MariaDB container state to: {{ pod_state }}"
+  containers.podman.podman_container:
+    name: "mariadb-{{ http_port }}"
+    pod: "pod-{{ http_port }}"
+    state: "{{ pod_state }}"
+    restart_policy: on-failure
+    image: "docker.io/library/mariadb:10.5.12"
+    privileged: false
+    volumes:
+      - "mariadb-{{ http_port }}:/var/lib/mysql"
+    env:
+      MYSQL_DATABASE: "wordpress"
+      MYSQL_USER: "{{ mysql_user }}"
+      MYSQL_PASSWORD: "{{ mysql_pass }}"
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+
+- debug:
+    msg: "Database credentials: {{ mysql_user}}:{{ mysql_pass }}"
