@@ -1,0 +1,92 @@
+---
+- name: "Create the certs volume"
+  containers.podman.podman_volume:
+    name: "nginx-conf"
+    state: present
+  register: volume_state
+
+- name: "Define the container volume mountpoint"
+  set_fact:
+    _volume_path: "{{ volume_state.volume['Mountpoint'] }}"
+
+- name: "Generate self-signed certs"
+  include_tasks:
+    file: nginx/certs.yml
+
+- name: "Store the cert in a secret"
+  containers.podman.podman_secret:
+    state: present
+    name: "{{ cert_path | basename }}"
+    data: "{{ cert_data }}"
+    force: true
+
+- name: "Store the cert in a secret"
+  containers.podman.podman_secret:
+    state: present
+    name: "{{ cert_privatekey_path | basename }}"
+    data: "{{ key_data }}"
+    force: true
+
+- name: "Create the Wordpress WWW volume"
+  containers.podman.podman_volume:
+    name: "nginx-conf"
+    state: present
+  register: volume_state
+
+- name: "Define the container volume mountpoint"
+  set_fact:
+    _volume_path: "{{ volume_state.volume['Mountpoint'] }}"
+
+- name: "Create the Nginx config file"
+  vars:
+    ansible_managed: "# ANSIBLE MANAGED FILE - DO NOT EDIT"
+  copy:
+    mode: 0644
+    dest: "{{ _volume_path }}/default.conf"
+    content: |
+      {{ ansible_managed }}
+      server {
+          listen                443 ssl;
+          server_name           localhost;
+          ssl_certificate       /run/secrets/{{ cert_path | basename }};
+          ssl_certificate_key   /run/secrets/{{ cert_privatekey_path | basename }};
+
+          access_log  /var/log/nginx/host.access.log  main;
+
+          location /wp1 {
+              proxy_pass   http://127.0.0.1:8080;
+          }
+
+          #error_page  404              /404.html;
+
+          # redirect server error pages to the static page /50x.html
+          #
+          error_page   500 502 503 504  /50x.html;
+          location = /50x.html {
+              root   /usr/share/nginx/html;
+          }
+
+          # deny access to .htaccess files, if Apache's document root
+          # concurs with nginx's one
+          #
+          #location ~ /\.ht {
+          #    deny  all;
+          #}
+      }
+
+- name: "Set the Nginx container"
+  containers.podman.podman_container:
+    name: "web"
+    image: "docker.io/nginx:1"
+    privileged: false
+    state: started
+    restart_policy: on-failure
+    secrets:
+      - "{{ cert_path | basename }}"
+      - "{{ cert_privatekey_path | basename }}"
+    ports:
+      - "443:443"
+    volumes:
+      - "nginx-conf:/etc/nginx/conf.d/"
+    env:
+      NGINX_ENVSUBST_TEMPLATE_DIR: /run/secrets/

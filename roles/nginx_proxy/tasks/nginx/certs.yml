@@ -1,0 +1,58 @@
+---
+- name: "Install the Python crypto libraries"
+  become: true
+  dnf:
+    name:
+      - python3-cryptography
+
+- name: "Create the certs directory"
+  become: true
+  file:
+    mode: 0600
+    state: directory
+    path: "{{ item | dirname }}"
+  with_items:
+    - "{{ cert_path }}"
+    - "{{ cert_csr_path }}"
+    - "{{ cert_privatekey_path }}"
+
+- name: "Generate the private key"
+  become: true
+  community.crypto.openssl_privatekey:
+    path: "{{ cert_privatekey_path }}"
+
+- name: "Generate an OpenSSL CSR"
+  become: true
+  openssl_csr:
+    path: "{{ cert_csr_path }}"
+    privatekey_path: "{{ cert_privatekey_path }}"
+    common_name: "localhost"
+
+- name: "Generate a self signed certificate"
+  become: true
+  community.crypto.x509_certificate:
+    path: "{{ cert_path }}"
+    privatekey_path: "{{ cert_privatekey_path }}"
+    csr_path: "{{ cert_csr_path }}"
+    provider: "selfsigned"
+    force: true
+
+- name: "Slurp the certificate"
+  become: yes
+  slurp:
+    src: "{{ cert_path }}"
+  register: cert_data_b64
+
+- name: "Set the certificate data fact"
+  set_fact:
+    cert_data: "{{ cert_data_b64['content'] | b64decode }}"
+
+- name: "Slurp the private key"
+  become: yes
+  slurp:
+    src: "{{ cert_privatekey_path }}"
+  register: key_data_b64
+
+- name: "Set the certificate data fact"
+  set_fact:
+    key_data: "{{ key_data_b64['content'] | b64decode }}"

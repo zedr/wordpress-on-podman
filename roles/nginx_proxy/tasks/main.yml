@@ -1,0 +1,12 @@
+---
+- name: "Dependencies must be installed"
+  import_tasks:
+    file: "deps.yml"
+
+- name: "Allow non-root exposing 443"
+  import_tasks:
+    file: "sysctl.yml"
+
+- name: "Nginx must be run as a pod"
+  import_tasks:
+    file: "nginx.yml"
