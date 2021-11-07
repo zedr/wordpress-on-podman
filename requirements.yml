@@ -1,4 +1,5 @@
 collections:
   - community.libvirt
   - community.crypto
-  - containers.podman
+  - name: containers.podman
+    version: 1.8.1
