@@ -22,6 +22,11 @@ deps: ${ENV}
 converge: deps
 	@${IN_ENV} cd roles/wordpress_standalone; molecule converge
 
+verify: deps
+	@${IN_ENV} cd roles/wordpress_standalone; molecule converge
+
+destroy:
+	@${IN_ENV} cd roles/wordpress_standalone; molecule destroy
 
 clean:
 	@rm -rf ${ENV}
