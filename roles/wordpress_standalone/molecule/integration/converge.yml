@@ -1,0 +1,15 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: "Include wordpress_standalone"
+      include_role:
+        name: "wordpress_standalone"
+
+    - name: "Include nginx_proxy"
+      include_role:
+        name: "nginx_proxy"
+      vars:
+        networks: "net-8080"
+

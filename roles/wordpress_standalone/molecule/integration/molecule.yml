@@ -1,0 +1,14 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: libvirt
+platforms:
+  - name: instance
+    image_url: ${CLOUD_IMAGE_URL:-https://cloud.centos.org/centos/8-stream/x86_64/images/CentOS-Stream-GenericCloud-8-20210603.0.x86_64.qcow2}
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "../../../"
+verifier:
+  name: ansible

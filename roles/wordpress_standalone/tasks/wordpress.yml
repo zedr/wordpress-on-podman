@@ -1,14 +1,17 @@
 ---
 - name: "Create the Wordpress WWW volume"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_volume:
     name: "wordpress-{{ http_port }}-www"
-    state: "{{ volume_state }}"
+    state: "present"
 
 - name: "Set the Wordpress container state to: {{ pod_state }}"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_container:
     name: "wordpress-{{ http_port }}"
     pod: "pod-{{ http_port }}"
-    state: "{{ pod_state }}"
     restart_policy: on-failure
     image: "docker.io/library/wordpress:5.6.2-php7.4"
     privileged: false

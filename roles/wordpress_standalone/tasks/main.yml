@@ -1,4 +1,10 @@
 ---
+- name: "Create the local gitlab-runner user"
+  become: yes
+  user:
+    name: "{{ podman_user }}"
+    group: "users"
+
 - name: "Dependencies must be installed"
   import_tasks:
     file: "deps.yml"

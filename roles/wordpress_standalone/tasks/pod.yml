@@ -1,12 +1,17 @@
 ---
 - name: "Create a network for the application"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_network:
     name: "net-{{ http_port }}"
-    internal: true
 
 - name: "Set common Pod state to: {{ pod_state }}"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_pod:
     name: "pod-{{ http_port }}"
     hostname: "pod-{{ http_port }}"
     state: "{{ pod_state }}"
     network: "net-{{ http_port }}"
+    ports:
+      - "8080:80"

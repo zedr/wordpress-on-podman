@@ -1,3 +1,5 @@
 cert_path: "/etc/ssl/crt/nginx_proxy.crt"
 cert_csr_path: "/etc/ssl/csr/nginx_proxy.csr"
 cert_privatekey_path: "/etc/ssl/private/nginx_proxy.pem"
+podman_user: "podman"
+networks: "bridge"

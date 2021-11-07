@@ -1,5 +1,16 @@
 ---
+- name: "Set common Pod state to: {{ pod_state }}"
+  become_user: "{{ podman_user }}"
+  become: true
+  containers.podman.podman_pod:
+    name: "pod-443"
+    hostname: "web"
+    state: "started"
+    network: "{{ networks }}"
+
 - name: "Create the certs volume"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_volume:
     name: "nginx-conf"
     state: present
@@ -14,6 +25,8 @@
     file: nginx/certs.yml
 
 - name: "Store the cert in a secret"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_secret:
     state: present
     name: "{{ cert_path | basename }}"
@@ -21,6 +34,8 @@
     force: true
 
 - name: "Store the cert in a secret"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_secret:
     state: present
     name: "{{ cert_privatekey_path | basename }}"
@@ -28,6 +43,8 @@
     force: true
 
 - name: "Create the Wordpress WWW volume"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_volume:
     name: "nginx-conf"
     state: present
@@ -38,6 +55,8 @@
     _volume_path: "{{ volume_state.volume['Mountpoint'] }}"
 
 - name: "Create the Nginx config file"
+  become_user: "{{ podman_user }}"
+  become: true
   vars:
     ansible_managed: "# ANSIBLE MANAGED FILE - DO NOT EDIT"
   copy:
@@ -54,7 +73,7 @@
           access_log  /var/log/nginx/host.access.log  main;
 
           location /wp1 {
-              proxy_pass   http://127.0.0.1:8080;
+              proxy_pass   http://{{ ansible_host }}:8080;
           }
 
           #error_page  404              /404.html;
@@ -75,6 +94,8 @@
       }
 
 - name: "Set the Nginx container"
+  become_user: "{{ podman_user }}"
+  become: true
   containers.podman.podman_container:
     name: "web"
     image: "docker.io/nginx:1"
