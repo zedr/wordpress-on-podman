@@ -1,0 +1,18 @@
+- hosts: all
+  order: sorted
+  gather_facts: True
+  pre_tasks:
+    - name: "Install recent kernel due to "
+      become: yes
+      dnf:
+        name:
+          - "kernel"
+        state: "latest"
+    - name: "Reboot to use the new kernel"
+      reboot:
+      become: yes
+  roles:
+    - role: wordpress_standalone
+    - role: nginx_proxy
+  vars:
+    networks: "net-8080"
